@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run FastAPI (uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "src.main:app",
+        "--reload",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "cwd": "${workspaceFolder}/fastapi-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/fastapi-backend/src"
+      },
+      "python": "${workspaceFolder}/fastapi-backend/.venv/bin/python",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run Celery Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "celery",
+      "args": [
+        "-A",
+        "src.celery_app",
+        "worker",
+        "--loglevel=info"
+      ],
+      "cwd": "${workspaceFolder}/fastapi-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/fastapi-backend/src"
+      },
+      "python": "${workspaceFolder}/fastapi-backend/.venv/bin/python",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run Celery Beat",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "celery",
+      "args": [
+        "-A",
+        "src.celery_app",
+        "beat",
+        "--loglevel=info"
+      ],
+      "cwd": "${workspaceFolder}/fastapi-backend",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/fastapi-backend/src"
+      },
+      "python": "${workspaceFolder}/fastapi-backend/.venv/bin/python",
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run API + Celery (all)",
+      "configurations": [
+        "Run FastAPI (uvicorn)",
+        "Run Celery Worker",
+        "Run Celery Beat"
+      ]
+    }
+  ]
+}
