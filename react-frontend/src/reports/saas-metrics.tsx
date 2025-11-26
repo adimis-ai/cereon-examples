@@ -5,7 +5,8 @@ import type {
   DashboardTheme,
 } from "@cereon/dashboard";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export const getSaasMetricsReport = (
   theme: DashboardTheme
@@ -39,7 +40,10 @@ export const getSaasMetricsReport = (
       settings: { number: {} },
       query: {
         variant: "http",
-        payload: { url: `${API_BASE_URL}/cards/saas_user_growth`, method: "GET" },
+        payload: {
+          url: `${API_BASE_URL}/cards/saas_user_growth`,
+          method: "GET",
+        },
       },
     },
     {
@@ -53,8 +57,6 @@ export const getSaasMetricsReport = (
           type: "line",
           data: [],
           curve: "monotone",
-          xAxis: { label: { value: "date" }, scale: "time" },
-          yAxis: { tick: { formatter: (v: number) => (v >= 1000 ? `${v / 1000}k` : `${v}`) } },
           series: [
             { dataKey: "mrr", name: "MRR", color: "#3b82f6" },
             { dataKey: "new", name: "New", color: "#10b981" },
@@ -66,7 +68,12 @@ export const getSaasMetricsReport = (
       },
       query: {
         variant: "streaming-http",
-        payload: { url: `${API_BASE_URL}/cards/revenue_trend`, method: "GET", streamFormat: "ndjson", streamDelimiter: "\n" },
+        payload: {
+          url: `${API_BASE_URL}/cards/revenue_trend`,
+          method: "GET",
+          streamFormat: "ndjson",
+          streamDelimiter: "\n",
+        },
       },
     },
     {
@@ -81,10 +88,18 @@ export const getSaasMetricsReport = (
           data: [],
           stacking: "none",
           curve: "natural",
-          xAxis: { label: { value: "date" }, scale: "time" },
           series: [
-            { dataKey: "cumulative_mrr", name: "Cumulative MRR", color: "#3b82f6", gradient: { enabled: true } },
-            { dataKey: "rolling_new", name: "Rolling New (7d)", color: "#10b981" },
+            {
+              dataKey: "cumulative_mrr",
+              name: "Cumulative MRR",
+              color: "#3b82f6",
+              gradient: { enabled: true },
+            },
+            {
+              dataKey: "rolling_new",
+              name: "Rolling New (7d)",
+              color: "#10b981",
+            },
           ],
           tooltip: { enabled: true },
           legend: { enabled: false },
@@ -92,7 +107,12 @@ export const getSaasMetricsReport = (
       },
       query: {
         variant: "streaming-http",
-        payload: { url: `${API_BASE_URL}/cards/revenue_area_trend`, method: "GET", streamFormat: "ndjson", streamDelimiter: "\n" },
+        payload: {
+          url: `${API_BASE_URL}/cards/revenue_area_trend`,
+          method: "GET",
+          streamFormat: "ndjson",
+          streamDelimiter: "\n",
+        },
       },
     },
     {
@@ -115,7 +135,13 @@ export const getSaasMetricsReport = (
           legend: { enabled: true },
         },
       },
-      query: { variant: "http", payload: { url: `${API_BASE_URL}/cards/plans_breakdown`, method: "GET" } },
+      query: {
+        variant: "http",
+        payload: {
+          url: `${API_BASE_URL}/cards/plans_breakdown`,
+          method: "GET",
+        },
+      },
     },
     {
       id: "revenue_share_pie",
@@ -137,7 +163,13 @@ export const getSaasMetricsReport = (
           legend: { enabled: true },
         },
       },
-      query: { variant: "http", payload: { url: `${API_BASE_URL}/cards/revenue_share_pie`, method: "GET" } },
+      query: {
+        variant: "http",
+        payload: {
+          url: `${API_BASE_URL}/cards/revenue_share_pie`,
+          method: "GET",
+        },
+      },
     },
     {
       id: "health_radial",
@@ -156,7 +188,10 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
         },
       },
-      query: { variant: "http", payload: { url: `${API_BASE_URL}/cards/health_radial`, method: "GET" } },
+      query: {
+        variant: "http",
+        payload: { url: `${API_BASE_URL}/cards/health_radial`, method: "GET" },
+      },
     },
     {
       id: "feature_usage_radar",
@@ -177,7 +212,13 @@ export const getSaasMetricsReport = (
           legend: { enabled: true },
         },
       },
-      query: { variant: "http", payload: { url: `${API_BASE_URL}/cards/feature_usage_radar`, method: "GET" } },
+      query: {
+        variant: "http",
+        payload: {
+          url: `${API_BASE_URL}/cards/feature_usage_radar`,
+          method: "GET",
+        },
+      },
     },
     {
       id: "churn_cohort",
@@ -186,7 +227,10 @@ export const getSaasMetricsReport = (
       description: "Cohort retention matrix",
       gridPosition: { x: 0, y: 20, w: 12, h: 10 } as CardGridPosition,
       settings: { table: { enablePagination: true } },
-      query: { variant: "http", payload: { url: `${API_BASE_URL}/cards/churn_cohort`, method: "GET" } },
+      query: {
+        variant: "http",
+        payload: { url: `${API_BASE_URL}/cards/churn_cohort`, method: "GET" },
+      },
     },
   ];
 
