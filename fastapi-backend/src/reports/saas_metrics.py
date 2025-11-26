@@ -45,7 +45,7 @@ class MrrOverviewCard(BaseCard[NumberCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> List[NumberCardRecord]:
         # Compute basic KPIs from generated series
-        series = _generate_revenue_series(90)
+        series = _generate_revenue_series(28)
         latest = series[-1]["mrr"] if series else 0
         prev = series[-2]["mrr"] if len(series) > 1 else None
 
@@ -117,11 +117,12 @@ class RevenueTrendCard(BaseCard[ChartCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
         # Stream time series in chunks (simulate streaming-http)
-        series = _generate_revenue_series(90)
+        series = _generate_revenue_series(28)
 
         chunk_size = 7
+        # send non-overlapping chunks to reduce repeated payloads
         for i in range(0, len(series), chunk_size):
-            chunk = series[: i + chunk_size]
+            chunk = series[i : i + chunk_size]
             payload = {
                 "kind": "line",
                 "report_id": cls.report_id,
@@ -142,27 +143,26 @@ class RevenueAreaTrendCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
-        series = _generate_revenue_series(90)
-        # yield cumulative view in weekly chunks to simulate streaming
-        cumulative = []
-        for i, row in enumerate(series):
-            cumulative.append(
+        series = _generate_revenue_series(28)
+        # yield recent weekly windows (max 7 items) to avoid sending full cumulative history
+        for i in range(0, len(series), 7):
+            window = series[i : i + 7]
+            data = [
                 {
                     "date": row["date"],
                     "cumulative_mrr": row["mrr"],
-                    "rolling_new": sum(r["new"] for r in series[max(0, i - 6) : i + 1]),
+                    "rolling_new": sum(r["new"] for r in series[max(0, idx - 6) : idx + 1]),
                 }
-            )
-            # yield every 7 items or at the end
-            if (i + 1) % 7 == 0 or i == len(series) - 1:
-                payload = {
-                    "kind": "area",
-                    "report_id": cls.report_id,
-                    "card_id": cls.card_id,
-                    "data": {"data": list(cumulative)},
-                    "meta": {"startedAt": datetime.utcnow().isoformat() + "Z"},
-                }
-                yield cls.response_model(**payload)
+                for idx, row in enumerate(window, start=i)
+            ]
+            payload = {
+                "kind": "area",
+                "report_id": cls.report_id,
+                "card_id": cls.card_id,
+                "data": {"data": data},
+                "meta": {"startedAt": datetime.utcnow().isoformat() + "Z"},
+            }
+            yield cls.response_model(**payload)
 
 
 class PlansBreakdownCard(BaseCard[ChartCardRecord]):
@@ -276,10 +276,10 @@ class ChurnCohortCard(BaseCard[TableCardRecord]):
     async def handler(cls, ctx=None) -> List[TableCardRecord]:
         # Simple static cohort matrix
         rows = []
-        # cohort months
-        for m in range(6):
+        # smaller cohort months to reduce payload
+        for m in range(3):
             row = {"cohort_month": f"2025-0{m+1}", "month_0": 1.0}
-            for off in range(1, 6):
+            for off in range(1, 3):
                 row[f"month_{off}"] = round(1.0 - 0.1 * off - 0.02 * m, 2)
             rows.append(row)
 
