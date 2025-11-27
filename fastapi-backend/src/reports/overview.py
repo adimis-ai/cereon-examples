@@ -45,16 +45,6 @@ CONFIG = {
     },
 }
 
-"""TODO: Like a senior fastapi developer, create the following report cards:
-- All 3 packages download counts as a single area chart with 3 areas, if possible should update in real-time (every minute)
-- All 3 packages commit history as a single line chart with 3 line, if possible should update in real-time (every minute)
-- All 3 packages repo likes as a single horizontal bar chart with 3 bar, if possible should update in real-time (every minute)
-"""
-
-
-def _now_iso_date():
-    return datetime.utcnow().date().isoformat()
-
 
 async def _fetch_npm_downloads(package_name: str, days: int = 30) -> List[Dict[str, Any]]:
     """Try to fetch npm downloads API. Returns list of {date, downloads} or raises."""
@@ -64,7 +54,10 @@ async def _fetch_npm_downloads(package_name: str, days: int = 30) -> List[Dict[s
         r.raise_for_status()
         payload = r.json()
         # payload has 'downloads' list of {day, downloads}
-        return [{"date": d.get("day") or d.get("date"), "downloads": d.get("downloads", 0)} for d in payload.get("downloads", [])]
+        return [
+            {"date": d.get("day") or d.get("date"), "downloads": d.get("downloads", 0)}
+            for d in payload.get("downloads", [])
+        ]
 
 
 async def _fetch_pypi_downloads(package_name: str, days: int = 30) -> List[Dict[str, Any]]:
@@ -81,7 +74,10 @@ async def _fetch_pypi_downloads(package_name: str, days: int = 30) -> List[Dict[
         month = recent.get("last_month", 0) or recent.get("month", 0)
         avg = int(month / max(1, 30))
         today = datetime.utcnow().date()
-        return [{"date": (today - timedelta(days=i)).isoformat(), "downloads": avg} for i in reversed(range(days))]
+        return [
+            {"date": (today - timedelta(days=i)).isoformat(), "downloads": avg}
+            for i in reversed(range(days))
+        ]
 
 
 def _synth_series(days: int = 30, base: int = 1000, growth: float = 0.02, noise: int = 200):
@@ -106,6 +102,7 @@ class PackageDownloadsAreaCard(BaseCard[ChartCardRecord]):
     route_prefix = "/cards"
     response_model = ChartCardRecord
     transport = "http"
+
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
         params = (ctx or {}).get("params", {}) if ctx else {}
@@ -122,9 +119,13 @@ class PackageDownloadsAreaCard(BaseCard[ChartCardRecord]):
                     data = await _fetch_pypi_downloads(pkg, days=days)
                     series_by_pkg[pkg] = [{"date": d["date"], pkg: d["downloads"]} for d in data]
                 else:
-                    series_by_pkg[pkg] = [{"date": x["date"], pkg: x["value"]} for x in _synth_series(days, base=1000)]
+                    series_by_pkg[pkg] = [
+                        {"date": x["date"], pkg: x["value"]} for x in _synth_series(days, base=1000)
+                    ]
             except Exception:
-                series_by_pkg[pkg] = [{"date": x["date"], pkg: x["value"]} for x in _synth_series(days, base=1000)]
+                series_by_pkg[pkg] = [
+                    {"date": x["date"], pkg: x["value"]} for x in _synth_series(days, base=1000)
+                ]
 
         merged: List[Dict[str, Any]] = []
         dates = [d["date"] for d in next(iter(series_by_pkg.values()))]
@@ -189,7 +190,13 @@ class PackageCommitsLineCard(BaseCard[ChartCardRecord]):
                         day = (datetime.utcnow().date() - timedelta(days=days - i - 1)).isoformat()
                         out.append({"date": day, "commits": counts.get(day, 0)})
                     return out
-            return [{"date": (datetime.utcnow().date() - timedelta(days=days - i - 1)).isoformat(), "commits": 0} for i in range(days)]
+            return [
+                {
+                    "date": (datetime.utcnow().date() - timedelta(days=days - i - 1)).isoformat(),
+                    "commits": 0,
+                }
+                for i in range(days)
+            ]
 
         series_by_pkg: Dict[str, List[Dict[str, Any]]] = {}
         for pkg, info in CONFIG["packages"].items():
@@ -198,7 +205,10 @@ class PackageCommitsLineCard(BaseCard[ChartCardRecord]):
                 series = await _fetch_commits_for_repo(repo, days=days)
                 series_by_pkg[pkg] = [{"date": s["date"], pkg: s.get("commits", 0)} for s in series]
             except Exception:
-                series_by_pkg[pkg] = [{"date": x["date"], pkg: x["value"]} for x in _synth_series(days, base=5, growth=0.01, noise=3)]
+                series_by_pkg[pkg] = [
+                    {"date": x["date"], pkg: x["value"]}
+                    for x in _synth_series(days, base=5, growth=0.01, noise=3)
+                ]
 
         dates = [d["date"] for d in next(iter(series_by_pkg.values()))]
         merged: List[Dict[str, Any]] = []
@@ -259,4 +269,3 @@ class PackageLikesBarCard(BaseCard[ChartCardRecord]):
             "data": {"data": rows},
         }
         return [cls.response_model(**payload)]
-
