@@ -9,6 +9,11 @@ from reports.saas_metrics import (
     HealthRadialCard,
     ChurnCohortCard,
 )
+from reports.summary import (
+    PackageDownloadsAreaCard,
+    PackageCommitsLineCard,
+    PackageLikesBarCard,
+)
 
 
 ALL_OVERVIEW_CARDS = [
@@ -21,4 +26,7 @@ ALL_OVERVIEW_CARDS = [
     FeatureUsageRadarCard,
     HealthRadialCard,
     ChurnCohortCard,
+    PackageDownloadsAreaCard,
+    PackageCommitsLineCard,
+    PackageLikesBarCard,
 ]
