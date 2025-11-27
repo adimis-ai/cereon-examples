@@ -52,7 +52,7 @@ export const getOverviewReport = (
     kind: "recharts:line",
     title: "Repository Commits (30d)",
     description: "Daily commits across repositories",
-    gridPosition: { x: 0, y: 4, w: 6, h: 10 } as CardGridPosition,
+    gridPosition: { x: 0, y: 4, w: 6, h: 7 } as CardGridPosition,
     settings: {
       chartConfig: {
         type: "line",
@@ -77,7 +77,7 @@ export const getOverviewReport = (
     kind: "recharts:area",
     title: "Package Downloads (30d)",
     description: "Daily downloads (synthetic when upstream unavailable)",
-    gridPosition: { x: 6, y: 4, w: 6, h: 10 } as CardGridPosition,
+    gridPosition: { x: 6, y: 4, w: 6, h: 7 } as CardGridPosition,
     settings: {
       chartConfig: {
         type: "area",
@@ -104,7 +104,7 @@ export const getOverviewReport = (
     kind: "recharts:bar",
     title: "Repository Stars",
     description: "Current GitHub stars for each repository",
-    gridPosition: { x: 0, y: 14, w: 12, h: 8 } as CardGridPosition,
+    gridPosition: { x: 0, y: 14, w: 12, h: 7 } as CardGridPosition,
     settings: {
       chartConfig: {
         type: "bar-horizontal",
