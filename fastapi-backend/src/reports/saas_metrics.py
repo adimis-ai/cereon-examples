@@ -64,7 +64,9 @@ def _apply_filters_to_series(series: list, filters: Optional[Dict[str, Any]]):
         # optional numeric min filter (applies to mrr or value)
         min_value = None
         try:
-            min_value = float(filters.get("min_value")) if filters and "min_value" in filters else None
+            min_value = (
+                float(filters.get("min_value")) if filters and "min_value" in filters else None
+            )
         except Exception:
             min_value = None
         if min_value is not None:
@@ -93,9 +95,7 @@ class MrrOverviewCard(BaseCard[NumberCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> List[NumberCardRecord]:
         # Compute basic KPIs from generated series
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         series = _generate_revenue_series(28)
         series = _apply_filters_to_series(series, filters)
@@ -130,27 +130,11 @@ class SaasUserGrowthCard(BaseCard[NumberCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[NumberCardRecord]:
-        # Synthetic user metrics
-        # allow client to override synthetic numbers via filters/params
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
-
         dau = 4200
         wau = 15000
         mau = 48000
         activation = 0.27
         new_users = 350
-        if filters:
-            try:
-                dau = int(filters.get("dau", dau))
-                wau = int(filters.get("wau", wau))
-                mau = int(filters.get("mau", mau))
-                activation = float(filters.get("activation", activation))
-                new_users = int(filters.get("new_users", new_users))
-            except Exception:
-                pass
-
         payload = {
             "kind": "number",
             "report_id": cls.report_id,
@@ -184,9 +168,7 @@ class RevenueTrendCard(BaseCard[ChartCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
         # Stream time series in chunks (simulate streaming-http)
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         series = _generate_revenue_series(28)
         series = _apply_filters_to_series(series, filters)
@@ -215,9 +197,7 @@ class RevenueAreaTrendCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         series = _generate_revenue_series(28)
         series = _apply_filters_to_series(series, filters)
@@ -252,9 +232,7 @@ class PlansBreakdownCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         data = [
             {"plan": "Free", "active_users": 1200, "seats": 1200},
@@ -287,9 +265,7 @@ class RevenueSharePieCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         data = [
             {"name": "Product A", "value": 56000},
@@ -322,9 +298,7 @@ class FeatureUsageRadarCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         data = [
             {"subject": "Onboarding", "core": 80, "advanced": 60},
@@ -357,9 +331,7 @@ class HealthRadialCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
 
         data_point = {
             "online": 82,
@@ -396,10 +368,9 @@ class ChurnCohortCard(BaseCard[TableCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[TableCardRecord]:
+        print("[ChurnCohortCard] Handler invoked, ctx:", ctx)
         # Simple static cohort matrix
-        filters = None
-        if isinstance(ctx, dict):
-            filters = ctx.get("filters") or ctx.get("params")
+        filters = cls._get_filters_from_ctx(ctx)
         print("[ChurnCohortCard] Cohort filters:", filters)
 
         rows = []
