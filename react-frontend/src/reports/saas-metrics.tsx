@@ -20,6 +20,19 @@ export const getSaasMetricsReport = (
     Record<string, any>
   >[] = [
     {
+      id: "summary",
+      kind: "markdown",
+      title: "Dashboard Summary",
+      panel: false,
+      transparent: true,
+      gridPosition: { x: 0, y: 0, w: 12, h: 3.5 } as CardGridPosition,
+      settings: {
+        defaultContent: "",
+        markdownTheme: "auto",
+        enableTables: true,
+      },
+    },
+    {
       id: "mrr_overview",
       kind: "number",
       title: "Monthly Recurring Revenue",

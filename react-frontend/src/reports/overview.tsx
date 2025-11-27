@@ -8,14 +8,6 @@ import type {
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-/* TODO: Like a senior react ts developer, just like saas analytics report, create an overview report with these cards:
-
-Report Cards Layout Diagram:
-|       Summary Markdown Card       |
-| Line Chart Card | Area Chart Card |
-|           Bar Chart Card          |
-*/
-
 export const getOverviewReport = (
   theme: DashboardTheme
 ): DashboardReportSpec => {
@@ -26,7 +18,6 @@ export const getOverviewReport = (
     Record<string, any>,
     Record<string, any>
   >[] = [];
-  // Summary markdown at top, full width
   cards.push({
     id: "overview_summary",
     kind: "markdown",
@@ -35,7 +26,8 @@ export const getOverviewReport = (
     transparent: true,
     gridPosition: { x: 0, y: 0, w: 12, h: 3.5 } as CardGridPosition,
     settings: {
-      defaultContent: `# Cereon Projects Overview\n\nThis dashboard highlights key signals for the Cereon open-source projects: ` +
+      defaultContent:
+        `# Cereon Projects Overview\n\nThis dashboard highlights key signals for the Cereon open-source projects: ` +
         "`@cereon/dashboard`, `@cereon/recharts`, and `cereon-sdk`.\n\n" +
         "- Area chart: package downloads (last 30 days)\n" +
         "- Line chart: commit activity (last 30 days)\n" +
@@ -46,7 +38,6 @@ export const getOverviewReport = (
     },
   });
 
-  // Left: Line chart (commits), Right: Area chart (downloads)
   cards.push({
     id: "packages_commits_line",
     kind: "recharts:line",
@@ -68,7 +59,10 @@ export const getOverviewReport = (
     },
     query: {
       variant: "http",
-      payload: { url: `${API_BASE_URL}/cards/packages_commits_line?days=30`, method: "GET" },
+      payload: {
+        url: `${API_BASE_URL}/cards/packages_commits_line?days=30`,
+        method: "GET",
+      },
     },
   });
 
@@ -94,11 +88,13 @@ export const getOverviewReport = (
     },
     query: {
       variant: "http",
-      payload: { url: `${API_BASE_URL}/cards/packages_downloads_area?days=30`, method: "GET" },
+      payload: {
+        url: `${API_BASE_URL}/cards/packages_downloads_area?days=30`,
+        method: "GET",
+      },
     },
   });
 
-  // Full-width horizontal bar chart for likes/stars
   cards.push({
     id: "packages_likes_bar",
     kind: "recharts:bar",
@@ -116,7 +112,10 @@ export const getOverviewReport = (
     },
     query: {
       variant: "http",
-      payload: { url: `${API_BASE_URL}/cards/packages_likes_bar`, method: "GET" },
+      payload: {
+        url: `${API_BASE_URL}/cards/packages_likes_bar`,
+        method: "GET",
+      },
     },
   });
 
