@@ -380,10 +380,14 @@ wheels = [
 [[package]]
 name = "cereon-sdk"
 version = "0.1.8"
-source = { directory = "../../cereon-sdk" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/21/c7/4129b0f3b0c5d7a8d21e91f03d45b10c80c8a7b143e920b9d286971ae181/cereon_sdk-0.1.8.tar.gz", hash = "sha256:4ca4bec4db14abe399aac084cd5c61b0a25205d6cfa539713438f6cacd9d36a6", size = 80761, upload-time = "2025-11-27T21:01:03.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/ae/5e3a001f8658ab82bd8a50b5fc906dd6602bb5b991d223b7f6eea1f4afbd/cereon_sdk-0.1.8-py3-none-any.whl", hash = "sha256:3887e225d284eea48d57aec2aaaf54091d82a63c660525d88e8ce5d1edaca2d2", size = 30447, upload-time = "2025-11-27T21:01:02.631Z" },
 ]
 
 [package.optional-dependencies]
@@ -392,29 +396,6 @@ fastapi = [
     { name = "orjson" },
     { name = "uvicorn" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "asgiref", marker = "extra == 'django'", specifier = ">=3.8.0" },
-    { name = "black", marker = "extra == 'dev'" },
-    { name = "channels", marker = "extra == 'django'", specifier = ">=4.0.0" },
-    { name = "django", marker = "extra == 'all'" },
-    { name = "django", marker = "extra == 'django'", specifier = ">=4.2" },
-    { name = "djangorestframework", marker = "extra == 'django'", specifier = ">=3.14.0" },
-    { name = "fastapi", marker = "extra == 'all'" },
-    { name = "fastapi", marker = "extra == 'fastapi'", specifier = ">=0.110.0" },
-    { name = "orjson", marker = "python_full_version >= '3.8' and extra == 'fastapi'", specifier = ">=3.9.0" },
-    { name = "pre-commit", marker = "extra == 'dev'" },
-    { name = "pydantic", specifier = ">=2.6.0" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "pytest-django", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'dev'" },
-    { name = "typing-extensions", specifier = ">=4.9.0" },
-    { name = "uvicorn", marker = "extra == 'fastapi'", specifier = ">=0.22.0" },
-]
-provides-extras = ["dev", "fastapi", "django", "all"]
 
 [[package]]
 name = "certifi"
@@ -883,7 +864,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "beautifulsoup4", specifier = ">=4.14.2" },
     { name = "celery", specifier = ">=5.5.3" },
-    { name = "cereon-sdk", extras = ["fastapi"], directory = "../../cereon-sdk" },
+    { name = "cereon-sdk", extras = ["fastapi"], specifier = "==0.1.8" },
     { name = "copilotkit", specifier = ">=0.1.70" },
     { name = "croniter", specifier = ">=3.0.0,<4.0.0" },
     { name = "docker", specifier = ">=7.1.0" },
