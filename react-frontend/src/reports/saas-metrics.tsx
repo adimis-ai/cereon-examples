@@ -27,7 +27,8 @@ export const getSaasMetricsReport = (
       transparent: true,
       gridPosition: { x: 0, y: 0, w: 12, h: 1 } as CardGridPosition,
       settings: {
-        defaultContent: "This dashboard presents a compact SaaS metrics demo showcasing key financial, product, and system-health indicators, including MRR, user activity, revenue trends, plan distributions, feature usage, churn cohorts, and real-time performance signals. It combines fast-updating KPIs with streaming line/area charts and multi-dimensional visualizations to illustrate how Cereon dashboards handle live data, complex compositions, and diverse metric types in a single unified report.",
+        defaultContent:
+          "This dashboard presents a compact SaaS metrics demo showcasing key financial, product, and system-health indicators, including MRR, user activity, revenue trends, plan distributions, feature usage, churn cohorts, and real-time performance signals. It combines fast-updating KPIs with streaming line/area charts and multi-dimensional visualizations to illustrate how Cereon dashboards handle live data, complex compositions, and diverse metric types in a single unified report.",
         markdownTheme: "auto",
         enableTables: true,
       },
@@ -38,6 +39,22 @@ export const getSaasMetricsReport = (
       title: "Monthly Recurring Revenue",
       gridPosition: { x: 0, y: 0, w: 3, h: 2 } as CardGridPosition,
       settings: {
+        filters: {
+          schema: [
+            {
+              name: "start_date",
+              label: "Start Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+            {
+              name: "end_date",
+              label: "End Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+          ],
+        },
         number: {
           large: true,
           showTrend: true,
@@ -49,7 +66,13 @@ export const getSaasMetricsReport = (
       },
       query: {
         variant: "http",
-        payload: { url: `${API_BASE_URL}/cards/mrr_overview`, method: "GET" },
+        payload: {
+          url: `${API_BASE_URL}/cards/mrr_overview`,
+          method: "GET",
+          params: {
+            /* filters placeholder */
+          },
+        },
       },
     },
     {
@@ -58,6 +81,16 @@ export const getSaasMetricsReport = (
       title: "Daily Active Users",
       gridPosition: { x: 3, y: 0, w: 3, h: 2 } as CardGridPosition,
       settings: {
+        filters: {
+          schema: [
+            {
+              name: "cohort_month",
+              label: "Cohort Month",
+              variant: "text",
+              placeholder: "YYYY-MM",
+            },
+          ],
+        },
         number: {
           showTrend: true,
           format: "number",
@@ -71,6 +104,9 @@ export const getSaasMetricsReport = (
         payload: {
           url: `${API_BASE_URL}/cards/saas_user_growth`,
           method: "GET",
+          params: {
+            /* filters placeholder */
+          },
         },
       },
     },
@@ -92,6 +128,28 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
           legend: { enabled: true },
         },
+        filters: {
+          schema: [
+            {
+              name: "start_date",
+              label: "Start Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+            {
+              name: "end_date",
+              label: "End Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+            {
+              name: "min_value",
+              label: "Min Value",
+              variant: "number",
+              placeholder: "minimum MRR",
+            },
+          ],
+        },
       },
       query: {
         variant: "streaming-http",
@@ -100,6 +158,9 @@ export const getSaasMetricsReport = (
           method: "GET",
           streamFormat: "ndjson",
           streamDelimiter: "\n",
+          params: {
+            /* filters placeholder: start_date, end_date, min_value */
+          },
         },
       },
     },
@@ -131,6 +192,22 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
           legend: { enabled: false },
         },
+        filters: {
+          schema: [
+            {
+              name: "start_date",
+              label: "Start Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+            {
+              name: "end_date",
+              label: "End Date",
+              variant: "text",
+              placeholder: "YYYY-MM-DD",
+            },
+          ],
+        },
       },
       query: {
         variant: "streaming-http",
@@ -139,6 +216,9 @@ export const getSaasMetricsReport = (
           method: "GET",
           streamFormat: "ndjson",
           streamDelimiter: "\n",
+          params: {
+            /* filters placeholder: start_date, end_date */
+          },
         },
       },
     },
@@ -160,12 +240,31 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
           legend: { enabled: true },
         },
+        filters: {
+          schema: [
+            {
+              name: "plan",
+              label: "Plan",
+              variant: "select",
+              options: [
+                { label: "All", value: "" },
+                { label: "Free", value: "Free" },
+                { label: "Startup", value: "Startup" },
+                { label: "Growth", value: "Growth" },
+                { label: "Enterprise", value: "Enterprise" },
+              ],
+            },
+          ],
+        },
       },
       query: {
         variant: "http",
         payload: {
           url: `${API_BASE_URL}/cards/plans_breakdown`,
           method: "GET",
+          params: {
+            /* filters placeholder: plan */
+          },
         },
       },
     },
@@ -187,12 +286,31 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
           legend: { enabled: true },
         },
+        filters: {
+          schema: [
+            {
+              name: "product",
+              label: "Product",
+              variant: "select",
+              options: [
+                { label: "All", value: "" },
+                { label: "Product A", value: "Product A" },
+                { label: "Product B", value: "Product B" },
+                { label: "Service", value: "Service" },
+                { label: "Channel", value: "Channel" },
+              ],
+            },
+          ],
+        },
       },
       query: {
         variant: "http",
         payload: {
           url: `${API_BASE_URL}/cards/revenue_share_pie`,
           method: "GET",
+          params: {
+            /* filters placeholder: product */
+          },
         },
       },
     },
@@ -218,6 +336,16 @@ export const getSaasMetricsReport = (
           outerRadius: "100%",
           innerRadius: "40%",
         },
+        filters: {
+          schema: [
+            {
+              name: "min_value",
+              label: "Min Threshold",
+              variant: "number",
+              placeholder: "hide under this value",
+            },
+          ],
+        },
       },
       query: {
         variant: "http",
@@ -241,12 +369,31 @@ export const getSaasMetricsReport = (
           tooltip: { enabled: true },
           legend: { enabled: true },
         },
+        filters: {
+          schema: [
+            {
+              name: "subject",
+              label: "Subject",
+              variant: "select",
+              options: [
+                { label: "All", value: "" },
+                { label: "Onboarding", value: "Onboarding" },
+                { label: "Reporting", value: "Reporting" },
+                { label: "Integrations", value: "Integrations" },
+                { label: "API", value: "API" },
+              ],
+            },
+          ],
+        },
       },
       query: {
         variant: "http",
         payload: {
           url: `${API_BASE_URL}/cards/feature_usage_radar`,
           method: "GET",
+          params: {
+            /* subject */
+          },
         },
       },
     },
@@ -256,10 +403,33 @@ export const getSaasMetricsReport = (
       title: "Churn Cohort",
       description: "Cohort retention matrix",
       gridPosition: { x: 0, y: 16, w: 6, h: 8 } as CardGridPosition,
-      settings: { table: { enablePagination: true } },
+      settings: {
+        table: { enablePagination: true },
+        filters: {
+          schema: [
+            {
+              name: "cohort_month",
+              label: "Cohort Month",
+              variant: "select",
+              options: [
+                { label: "All", value: "" },
+                { label: "2025-01", value: "2025-01" },
+                { label: "2025-02", value: "2025-02" },
+                { label: "2025-03", value: "2025-03" },
+              ],
+            },
+          ],
+        },
+      },
       query: {
         variant: "http",
-        payload: { url: `${API_BASE_URL}/cards/churn_cohort`, method: "GET" },
+        payload: {
+          url: `${API_BASE_URL}/cards/churn_cohort`,
+          method: "GET",
+          params: {
+            /* cohort_month */
+          },
+        },
       },
     },
   ];

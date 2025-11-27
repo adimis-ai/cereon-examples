@@ -10,6 +10,7 @@ from cereon_sdk.fastapi import (
 from fastapi import FastAPI
 from typing import List, AsyncIterable
 from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
 
 
 def _generate_revenue_series(days: int = 30):
@@ -34,6 +35,53 @@ def _generate_revenue_series(days: int = 30):
     return data
 
 
+def _parse_date(s: Optional[str]):
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s).date()
+    except Exception:
+        try:
+            return datetime.strptime(s, "%Y-%m-%d").date()
+        except Exception:
+            return None
+
+
+def _apply_filters_to_series(series: list, filters: Optional[Dict[str, Any]]):
+    if not filters:
+        return series
+
+    start = _parse_date(filters.get("start_date") if isinstance(filters, dict) else None)
+    end = _parse_date(filters.get("end_date") if isinstance(filters, dict) else None)
+
+    filtered = []
+    for row in series:
+        row_date = _parse_date(row.get("date"))
+        if start and row_date and row_date < start:
+            continue
+        if end and row_date and row_date > end:
+            continue
+        # optional numeric min filter (applies to mrr or value)
+        min_value = None
+        try:
+            min_value = float(filters.get("min_value")) if filters and "min_value" in filters else None
+        except Exception:
+            min_value = None
+        if min_value is not None:
+            # check mrr/new/expansion/value keys
+            val = None
+            for k in ("mrr", "value", "new", "expansion"):
+                if k in row:
+                    val = row[k]
+                    break
+            if val is None or float(val) < min_value:
+                continue
+
+        filtered.append(row)
+
+    return filtered
+
+
 class MrrOverviewCard(BaseCard[NumberCardRecord]):
     kind = "number"
     card_id = "mrr_overview"
@@ -45,7 +93,12 @@ class MrrOverviewCard(BaseCard[NumberCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> List[NumberCardRecord]:
         # Compute basic KPIs from generated series
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         series = _generate_revenue_series(28)
+        series = _apply_filters_to_series(series, filters)
         latest = series[-1]["mrr"] if series else 0
         prev = series[-2]["mrr"] if len(series) > 1 else None
 
@@ -78,11 +131,25 @@ class SaasUserGrowthCard(BaseCard[NumberCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> List[NumberCardRecord]:
         # Synthetic user metrics
+        # allow client to override synthetic numbers via filters/params
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         dau = 4200
         wau = 15000
         mau = 48000
         activation = 0.27
         new_users = 350
+        if filters:
+            try:
+                dau = int(filters.get("dau", dau))
+                wau = int(filters.get("wau", wau))
+                mau = int(filters.get("mau", mau))
+                activation = float(filters.get("activation", activation))
+                new_users = int(filters.get("new_users", new_users))
+            except Exception:
+                pass
 
         payload = {
             "kind": "number",
@@ -117,7 +184,12 @@ class RevenueTrendCard(BaseCard[ChartCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
         # Stream time series in chunks (simulate streaming-http)
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         series = _generate_revenue_series(28)
+        series = _apply_filters_to_series(series, filters)
 
         chunk_size = 7
         # send non-overlapping chunks to reduce repeated payloads
@@ -143,7 +215,12 @@ class RevenueAreaTrendCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> AsyncIterable[ChartCardRecord]:
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         series = _generate_revenue_series(28)
+        series = _apply_filters_to_series(series, filters)
         # yield recent weekly windows (max 7 items) to avoid sending full cumulative history
         for i in range(0, len(series), 7):
             window = series[i : i + 7]
@@ -175,12 +252,22 @@ class PlansBreakdownCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         data = [
             {"plan": "Free", "active_users": 1200, "seats": 1200},
             {"plan": "Startup", "active_users": 800, "seats": 2400},
             {"plan": "Growth", "active_users": 420, "seats": 2520},
             {"plan": "Enterprise", "active_users": 80, "seats": 1600},
         ]
+        # apply simple plan filter
+        if filters and isinstance(filters, dict):
+            plan = filters.get("plan")
+            if plan:
+                data = [d for d in data if d.get("plan") == plan]
+
         payload = {
             "kind": "bar",
             "report_id": cls.report_id,
@@ -200,12 +287,22 @@ class RevenueSharePieCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         data = [
             {"name": "Product A", "value": 56000},
             {"name": "Product B", "value": 32000},
             {"name": "Service", "value": 12000},
             {"name": "Channel", "value": 8000},
         ]
+        # allow product filter
+        if filters and isinstance(filters, dict):
+            product = filters.get("product")
+            if product:
+                data = [d for d in data if d.get("name") == product]
+
         payload = {
             "kind": "pie",
             "report_id": cls.report_id,
@@ -225,12 +322,22 @@ class FeatureUsageRadarCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         data = [
             {"subject": "Onboarding", "core": 80, "advanced": 60},
             {"subject": "Reporting", "core": 70, "advanced": 40},
             {"subject": "Integrations", "core": 65, "advanced": 55},
             {"subject": "API", "core": 50, "advanced": 30},
         ]
+        # optional subject filter
+        if filters and isinstance(filters, dict):
+            subject = filters.get("subject")
+            if subject:
+                data = [d for d in data if d.get("subject") == subject]
+
         payload = {
             "kind": "radar",
             "report_id": cls.report_id,
@@ -250,6 +357,10 @@ class HealthRadialCard(BaseCard[ChartCardRecord]):
 
     @classmethod
     async def handler(cls, ctx=None) -> List[ChartCardRecord]:
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         data_point = {
             "online": 82,
             "degraded": 25,
@@ -257,6 +368,14 @@ class HealthRadialCard(BaseCard[ChartCardRecord]):
             "maintenance": 10,
             "unknown": 22,
         }
+        # allow thresholding via min_value to hide low-state counts
+        if filters and isinstance(filters, dict):
+            try:
+                min_v = int(filters.get("min_value")) if "min_value" in filters else None
+            except Exception:
+                min_v = None
+            if min_v is not None:
+                data_point = {k: v for k, v in data_point.items() if v >= min_v}
 
         payload = {
             "kind": "radial",
@@ -278,6 +397,10 @@ class ChurnCohortCard(BaseCard[TableCardRecord]):
     @classmethod
     async def handler(cls, ctx=None) -> List[TableCardRecord]:
         # Simple static cohort matrix
+        filters = None
+        if isinstance(ctx, dict):
+            filters = ctx.get("filters") or ctx.get("params")
+
         rows = []
         # smaller cohort months to reduce payload
         for m in range(3):
@@ -285,6 +408,11 @@ class ChurnCohortCard(BaseCard[TableCardRecord]):
             for off in range(1, 3):
                 row[f"month_{off}"] = round(1.0 - 0.1 * off - 0.02 * m, 2)
             rows.append(row)
+        # optional filter to limit to recent cohorts
+        if filters and isinstance(filters, dict):
+            cohort = filters.get("cohort_month")
+            if cohort:
+                rows = [r for r in rows if r.get("cohort_month") == cohort]
 
         payload = {
             "kind": "table",
