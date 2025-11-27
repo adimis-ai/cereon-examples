@@ -7,6 +7,7 @@ import {
   useDashboard,
   TableCard,
   NumberCard,
+  MarkdownCard,
 } from "@cereon/dashboard";
 import { getSaasMetricsReport } from "./reports/saas-metrics";
 import * as charts from "@cereon/recharts";
@@ -24,6 +25,7 @@ function CardRegistrar() {
     registerCard("recharts:radial", charts.RadialChartCard);
     registerCard("table", TableCard);
     registerCard("number", NumberCard);
+    registerCard("markdown", MarkdownCard);
   }, []);
 
   return null;

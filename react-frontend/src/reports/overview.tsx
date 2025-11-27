@@ -31,18 +31,18 @@ export const getOverviewReport = (
     id: "overview_summary",
     kind: "markdown",
     title: "Project Summary",
+    panel: false,
+    transparent: true,
     gridPosition: { x: 0, y: 0, w: 12, h: 4 } as CardGridPosition,
     settings: {
-      markdown: {
-        defaultContent: `# Cereon Projects Overview\n\nThis dashboard highlights key signals for the Cereon open-source projects: ` +
-          "`@cereon/dashboard`, `@cereon/recharts`, and `cereon-sdk`.\n\n" +
-          "- Area chart: package downloads (last 30 days)\n" +
-          "- Line chart: commit activity (last 30 days)\n" +
-          "- Horizontal bar chart: repository stars (current)\n\n" +
-          "Data refreshes periodically from the demo backend.",
-        markdownTheme: "auto",
-        enableTables: true,
-      },
+      defaultContent: `# Cereon Projects Overview\n\nThis dashboard highlights key signals for the Cereon open-source projects: ` +
+        "`@cereon/dashboard`, `@cereon/recharts`, and `cereon-sdk`.\n\n" +
+        "- Area chart: package downloads (last 30 days)\n" +
+        "- Line chart: commit activity (last 30 days)\n" +
+        "- Horizontal bar chart: repository stars (current)\n\n" +
+        "Data refreshes periodically from the demo backend.",
+      markdownTheme: "auto",
+      enableTables: true,
     },
   });
 
