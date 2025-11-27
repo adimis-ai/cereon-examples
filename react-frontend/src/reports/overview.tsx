@@ -130,16 +130,9 @@ This demo uses three packages that work together to deliver full-stack dashboard
     settings: {
       chartConfig: {
         type: "bar",
+        orientation: "horizontal",
         grouping: "grouped",
         responsive: true,
-        xAxis: {
-          label: { value: "date" },
-          tick: { fontSize: 11, color: "var(--muted-foreground)" },
-        },
-        yAxis: {
-          label: { value: "stars" },
-          tick: { fontSize: 11, color: "var(--muted-foreground)" },
-        },
         series: [
           {
             dataKey: "cereon-dashboard",

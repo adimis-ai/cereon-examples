@@ -637,7 +637,12 @@ class PackageLikesBarCard(BaseCard[ChartCardRecord]):
             }
             return [cls.response_model(**payload)]
 
-        rows = []
+        # For consistency with the mocked time-series branch, return a merged
+        # per-date series even for the live (non-mock) branch. Construct a
+        # single-date series for `today` with package keys mapping to their
+        # current stargazer counts. This keeps the frontend's expected shape
+        # (array of {date, <pkg>: val, ...}) and avoids special-casing.
+        counts: Dict[str, int] = {}
         for pkg, info in CONFIG["packages"].items():
             repo = info.get("repo")
             likes = 0
@@ -657,12 +662,18 @@ class PackageLikesBarCard(BaseCard[ChartCardRecord]):
                         likes = repo_info.get("stargazers_count", 0)
             except Exception:
                 likes = 0
-            rows.append({"name": pkg, "value": likes})
+            counts[pkg] = likes
+
+        # Build a single-date merged series for today
+        today = datetime.utcnow().date().isoformat()
+        merged_row: Dict[str, Any] = {"date": today}
+        for pkg, val in counts.items():
+            merged_row[pkg] = val
 
         payload = {
             "kind": "recharts:bar",
             "report_id": cls.report_id,
             "card_id": cls.card_id,
-            "data": {"data": rows},
+            "data": {"data": [merged_row]},
         }
         return [cls.response_model(**payload)]
