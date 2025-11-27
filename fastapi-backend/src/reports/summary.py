@@ -8,5 +8,8 @@ from cereon_sdk.fastapi import (
 )
 
 from fastapi import FastAPI
+from dotenv import load_dotenv
 from typing import List, AsyncIterable
 from datetime import datetime, timedelta
+
+load_dotenv()
